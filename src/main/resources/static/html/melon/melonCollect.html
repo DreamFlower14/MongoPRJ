@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MongoDB의 insert Many를 활용하여 빠르게 저장하기</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        // html 로딩이 완료되고 실행됨
+        $(document).ready(function () {
+
+            // 버튼 클릭했을때, 발생되는 이벤트 생성함
+            $("#btnDropCollection").on("click", function () {
+
+                $.ajax({
+                        url: "/melon/dropCollection",
+                        type: "post",
+                        data: $("#f").serialize(),
+                        dataType: "JSON",
+                        success: function (json) {
+                            alert(json.msg);
+                        }
+                    }
+                )
+            })
+
+            $("#btnCollectMelonTop100").on("click", function () {
+                console.log("됐냐");
+
+                $.ajax({
+                    url: "/melon/insertManyField",
+                    type: "post",
+                    data: $("#f").serialize(),
+                    dataType: "JSON",
+                    success: function (json) {
+                        for (let i = 0; i < json.length; i++) {
+                            $("#melonData").append("<div class=\"divTableRow\">");
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].rank + "</div>")
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].song + "</div>")
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].singer + "</div>")
+                            $("#melonData").append("</div>");
+                        }
+                    }
+                })
+            })
+
+        })
+
+    </script>
+</head>
+<body>
+<h2>멜론 차트 100 조회하기</h2>
+<hr/>
+<br/>
+<div>
+    <button id="btnDropCollection" type="button">수집된 데이터 삭제하기</button>
+    <button id="btnCollectMelonTop100" type="button">멜론차트 100 수집하기</button>
+</div>
+<br/>
+<br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">순위</div>
+            <div class="divTableHead">노래 제목</div>
+            <div class="divTableHead">가수</div>
+        </div>
+    </div>
+    <div class="divTableBody" id="melonData"></div>
+</div>
+</div>
+</body>
+</html>

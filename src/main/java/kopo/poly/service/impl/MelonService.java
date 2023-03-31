@@ -38,11 +38,14 @@ public class MelonService implements IMelonService {
 
         // JSoup 라이브러리를 통해 사이트 접속되면 그 사이트의 전체 HTML 소스 저장할 변수
         Document doc = Jsoup.connect(url).get();
-        log.info("전체 소스 : " + doc);
+//        log.info("전체 소스 : " + doc);
 
         // <div class="service_list_song"> 이 태그 내에서 있는 HTML 소스만 element 에 저장됨
         Elements element = doc.select("div.service_list_song");
-        log.info("html 소스 : " + element);
+//        log.info("html 소스 : " + element);
+
+        // 노래 순위를 알려주기 위한 변수
+        int rank = 1;
 
         // Iterator 을 사용하여 멜론차트 정보를 가져오기
         for (Element songInfo : element.select("div.wrap_song_info")) {
@@ -51,6 +54,7 @@ public class MelonService implements IMelonService {
             String song = CmmUtil.nvl(songInfo.select("div.ellipsis.rank01 a").text());
             String singer = CmmUtil.nvl(songInfo.select("div.ellipsis.rank02 a").eq(0).text());
 
+            log.info("rank!!!!! : " + rank);
             log.info("song : " + song);
             log.info("singer : " + singer);
 
@@ -59,14 +63,18 @@ public class MelonService implements IMelonService {
 
                 MelonDTO pDTO = new MelonDTO();
                 pDTO.setCollectTime(DateUtil.getDateTime("yyyyMMddhhmmss"));
+                pDTO.setRank(rank);
                 pDTO.setSong(song);
                 pDTO.setSinger(singer);
 
+                // 순위가 점점 내려간다
+                rank++;
+                
                 // 한번에 여러개의 데이터를 MongoDB 에 저장할 List 형태의 데이터 저장하기
                 pList.add(pDTO);
-
             }
 
+            
         }
         log.info(this.getClass().getName() + ".doCollect 끝!!");
 
@@ -122,6 +130,129 @@ public class MelonService implements IMelonService {
         List<MelonDTO> rList = melonMapper.getSingerSongCnt(colNm);
 
         log.info(this.getClass().getName() + ".getSingerSongCnt 끝!!");
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> getSingerSong(MelonDTO pDTO) throws Exception {
+
+        log.info(this.getClass().getName() + ".getSingerSong 시작!!");
+
+        // MongoDB에 저장된 컬렉션 이름
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 결과값
+        List<MelonDTO> rList = null;
+
+        // Melon 노래 수집하기
+        if (this.collectMelonSong() == 1) {
+            // 가수 노래 수집하기
+            rList = melonMapper.getSingerSong(colNm, pDTO);
+
+        }
+
+        log.info(this.getClass().getName() + ".getSingerSong 끝!!");
+
+        return rList;
+    }
+
+    @Override
+    public int dropCollection() throws Exception {
+
+        log.info(this.getClass().getName() + ".dropCollection 시작!!");
+
+        int res = 0;
+
+        // MongoDB 에 저장된 컬렉션 이름
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 기족 수집된 멜론 TOP 100 수집한 컬렉션 삭제하기
+        res = melonMapper.dropCollection(colNm);
+
+        log.info(this.getClass().getName() + ".dropCollection 끝!!");
+
+        return res;
+    }
+
+    @Override
+    public List<MelonDTO> insertManyField() throws Exception {
+
+        log.info(this.getClass().getName() + ".insertManyField 시작!!");
+
+        List<MelonDTO> rList = null; // 변경된 데이터 조회 결과
+
+        // 생성할 컬렉션명
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // MongoDB에 데이터 저장하기
+        if (melonMapper.insertManyField(colNm, this.doCollect()) == 1) {
+
+            // 변경된 값을 확인하기 위해 MongoDB 로부터 데이터 조회하기
+            rList = melonMapper.getSongList(colNm);
+        }
+
+        log.info(this.getClass().getName() + ".insertManyField 끝!!");
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> updateField(MelonDTO pDTO) throws Exception {
+
+        String name = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.info(this.getClass().getName() + name + ". 시작!!");
+
+        List<MelonDTO> rList = null; // 변경된 데이터 조회 결과
+
+        // 수정할 컬렉션
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 기존 수집된 멜론 TOP100 수집된 컬렉션 삭제하기
+        melonMapper.dropCollection(colNm);
+
+        // 멜론 TOP100수집하기
+        if (this.collectMelonSong() == 1) {
+
+            // 예 : singer 필드에 저장된 "방탄소년단" 값을 "BTS"로 변경하기
+            if (melonMapper.updateField(colNm, pDTO) == 1) {
+
+                // 변경된 값을 확인하기 위해서 mongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getUpdateSinger(colNm, pDTO);
+            }
+        }
+
+        log.info(this.getClass().getName() + name +". 끝!!");
+
+        return rList;
+    }
+
+    @Override
+    public List<MelonDTO> updateAddListField(MelonDTO pDTO) throws Exception {
+
+        String name = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.info(this.getClass().getName() + "." + name + " 시작!!");
+
+        List<MelonDTO> rList = null;
+
+        // 수정할 컬렉션
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 기존 수집된 멜론 TOP100 수집된 컬렉션 삭제하기
+        melonMapper.dropCollection(colNm);
+
+        // 멜론 TOP100수집하기
+        if (this.collectMelonSong() == 1) {
+
+            // 예 : nickname 필드를 추가하고 BTS 값저장하기
+            if (melonMapper.updateAddField(colNm, pDTO) == 1) {
+
+                // 변경된 값을 확인하기 위해서 mongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getSingerSongNickName(colNm, pDTO);
+            }
+        }
+
+        log.info(this.getClass().getName() + "." + name +" 끝!!");
 
         return rList;
     }

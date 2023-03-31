@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>멜론 차트 데이터 add </title>
+  <link rel="stylesheet" href="/css/table.css"/>
+  <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript">
+
+    // html 로딩이 완료되고 실행됨
+    $(document).ready(function () {
+
+      // 버튼 클릭 이벤트 생성
+      $("#btnSend").on("click", function () {
+
+        $.ajax({
+                  url: "/melon/updateAddField",
+                  type: "post",
+                  data: $("#f").serialize(),
+                  dataType: "JSON",
+                  success: function (json) {
+                    for (let i = 0; i < json.length; i++) {
+                      console.log("됐냐")
+                      $("#melonData").append("<div class=\"divTableRow\">");
+                      $("#melonData").append("<div class=\"divTableCell\">" + json[i].song + "</div>");
+                      $("#melonData").append("<div class=\"divTableCell\">" + json[i].singer + "</div>");
+                      $("#melonData").append("<div class=\"divTableCell\">" + json[i].nickname + "</div>");
+                    }
+                  }
+                }
+        )
+      })
+    })
+  </script>
+</head>
+<body>
+<h2>멜론 차트 데이터 수정 -  가수 별명 추가</h2>
+<hr/>
+<br/>
+<form name="f" id="f">
+  <div class="divTable minimalistBlack">
+    <div class="divTableBody">
+      <div class="divTableRow">
+        <div class="divTableCell" style="width: 30%">추가할 가수 이름</div>
+        <div class="divTableCell" style="width: 70%"><input type="text" name="singer"></div>
+      </div>
+      <div class="divTableRow">
+        <div class="divTableCell">추가될 별명</div>
+        <div calss="divTableCell"><input type="text" name="nickname" maxlength="100"/></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button id="btnSend" type="button">가수 별명 추가하기</button>
+  </div>
+</form>
+<br/><br/>
+<div class="divTable minimalistBlack">
+  <div class="divTableHeading">
+    <div class="divTableRow">
+      <div class="divTableHead">노래 제목</div>
+      <div class="divTableHead">가수</div>
+      <div class="divTableHead">별명</div>
+    </div>
+  </div>
+  <div class="divTableBody" id="melonData"></div>
+</div>
+</body>
+</html>
