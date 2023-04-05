@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>멜론 차트 데이터 수정 List Field(멤버) 추가</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $("#btnAdd").on("click", function () {
+
+                console.log("해치웠나!?")
+                $("#memberData").append("<input type=\"text\" name=\"member\"> ");
+                $("#memberData").append("<input type=\"button\" class=\"btnRemove\" value=\"Remove\" >");
+                $("#memberData").append("<br/>");
+
+                $(".btnRemove").on("click", function () {
+                    $(this).prev().remove();
+                    $(this).next().remove();
+                    $(this).remove();
+                });
+
+            })
+
+            // 버튼 클릭 시 이벤트 생성
+            $("#btnSend").on("click", function () {
+
+                console.log("제발.. 그만해.. 이러다가 다~ 죽어...!!!!")
+                // ajax 호출해서 멜론 차트 조회하기
+                $.ajax({
+                    url: "/melon/updateAddListField",
+                    type: "post",
+                    data: $("#f").serialize(),
+                    dataType: "JSON",
+                    success: function (json) {
+                        for (let i = 0; i < json.length; i++) {
+                            $("#melonData").append("<div class=\"divTableRow\" >");
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].song + "</div>");
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].singer + "</div>");
+                            $("#melonData").append("<div class=\"divTableCell\">" + json[i].member + "</div>");
+                        }
+                    }
+                })
+            })
+        })
+    </script>
+</head>
+<body>
+<h2>멜론 차트 데이터 수정</h2>
+<hr/>
+<br/>
+<br/>
+<form name="f" id="f">
+    <div class="divTable minimalistBlack">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell" style="width: 30%">수정할 가수 이름</div>
+                <div class="divTableCell" style="width: 70%"><input type="text" name="singer"></div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">추가할 멤버 이름</div>
+                <div class="divTableCell" id="memberData">
+                    <input type="text" name="member"> <input type="button" id="btnAdd" value="add"><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button id="btnSend" type="button">가수 멤버 이름 추가하기</button>
+    </div>
+</form>
+<br/><br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">노래제목</div>
+            <div class="divTableHead">가수</div>
+            <div class="divTableHead">멤버</div>
+        </div>
+    </div>
+    <div class="divTableBody" id="melonData">
+
+    </div>
+</div>
+</body>
+</html>

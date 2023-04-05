@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -182,11 +183,12 @@ public class MelonController {
     /**
      * 가수 별명 추가하기
      * 예 : 방탄 소년단을 BTS 별명 추가하기
-     * */
+     */
     @PostMapping(value = "updateAddField")
     public List<MelonDTO> updateAddField(HttpServletRequest request) throws Exception {
 
-        String name = new Object() {}.getClass().getEnclosingMethod().getName();
+        String name = new Object() {
+        }.getClass().getEnclosingMethod().getName();
         log.info(this.getClass().getName() + "." + name + " 시작!!");
 
         String singer = CmmUtil.nvl(request.getParameter("singer"));
@@ -199,10 +201,99 @@ public class MelonController {
         pDTO.setSinger(singer);
         pDTO.setNickname(nickname);
 
-        List<MelonDTO> rList = Optional.ofNullable(melonService.updateAddListField(pDTO)).orElseGet(ArrayList::new);
+        List<MelonDTO> rList = Optional.ofNullable(melonService.updateAddField(pDTO)).orElseGet(ArrayList::new);
 
-        log.info(this.getClass().getName() + "." + name +" 끝!!");
+        log.info(this.getClass().getName() + "." + name + " 끝!!");
 
         return rList;
     }
+
+    /**
+     * 가수 멤버 이름들 (List 구조 필드 ) 추가하기
+     * */
+    @PostMapping(value = "updateAddListField")
+    public List<MelonDTO> updateAddListField(HttpServletRequest request) throws Exception {
+
+        String name = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.info(this.getClass().getName() + "." + name + " 시작!!");
+
+        String singer = CmmUtil.nvl(request.getParameter("singer")); // 필드를 추가할 가수
+
+        // 가수 그룹 이름은 여러명 입력될 수 있기에 배열로 받음
+        // 배열로 받는 방법 : <input type = "text" name="member" /> 의 name 속성 값이 동일하면 배열로 받아짐
+        String[] member = request.getParameterValues("member");
+
+        // String[] 구조를 List<String> 구조로 변환가히
+        List<String> memberList = Arrays.asList(member);
+
+        log.info("singer : " + singer);
+        log.info("member : " + member);
+
+        MelonDTO pDTO = new MelonDTO();
+        pDTO.setSinger(singer);
+        pDTO.setMember(memberList);
+
+        // java 8부터 제공되는 Optional 활용하여 NPE 처리
+        List<MelonDTO> rlist = Optional.ofNullable(melonService.updateAddListField(pDTO)).orElseGet(ArrayList::new);
+
+        log.info(this.getClass().getName() + "." + name +" 끝!!");
+
+        return rlist;
+    }
+
+    /**
+     * 가수 이름이 방탄소년단인 것을 BTS 로 변경 및 필드 추가하기
+     * */
+    @PostMapping(value = "updateFieldAndAddField")
+    public List<MelonDTO> updateFieldAndAddField(HttpServletRequest request) throws Exception {
+
+        String name = new Object() {}.getClass().getEnclosingMethod().getName();
+        log.info(this.getClass().getName() + "." + name + " 시작!!");
+
+        String singer = CmmUtil.nvl(request.getParameter("singer")); // 필드를 추가할 가수
+        String updateSinger = CmmUtil.nvl(request.getParameter("updateSinger")); // 필드를 추가할 가수
+        String addData = CmmUtil.nvl(request.getParameter("addData")); // 필드를 추가할 가수
+
+        log.info("singer : " + singer);
+        log.info("updateSinger : " + updateSinger);
+        log.info("addData : " + addData);
+
+        MelonDTO pDTO = new MelonDTO();
+        pDTO.setSinger(singer);
+        pDTO.setUpdateSinger(updateSinger);
+        pDTO.setAddFieldValue(addData);
+
+        // java 8부터 제공되는 Optional 활용하여 NPE 처리
+        List<MelonDTO> rlist = Optional.ofNullable(melonService.updateFieldAndAddField(pDTO)).orElseGet(ArrayList::new);
+
+        log.info(this.getClass().getName() + "." + name +" 끝!!");
+
+        return rlist;
+    }
+
+    /**
+     * 가수 이름이 방탄소년단인 노래 삭제하기
+     */
+    @PostMapping(value = "deleteDocument")
+    public List<MelonDTO> deleteDocument(HttpServletRequest request) throws Exception {
+
+        String name = new Object() {
+        }.getClass().getEnclosingMethod().getName();
+        log.info(this.getClass().getName() + name + ". 시작!!");
+
+        String singer = CmmUtil.nvl(request.getParameter("singer")); // 수정될 가수
+
+        log.info("Singer : " + singer);
+
+        MelonDTO pDTO = new MelonDTO();
+        pDTO.setSinger(singer);
+
+        // java8 부터 제공되는 optional 활용하여 NPE 처리
+        List<MelonDTO> rList = Optional.ofNullable(melonService.deleteDocument(pDTO)).orElseGet(ArrayList::new);
+
+        log.info(this.getClass().getName() + name + " 끝!!");
+
+        return rList;
+    }
+
 }
