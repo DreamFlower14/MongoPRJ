@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redis ZSet 구조에 JSON 형태로 저장</title>
+  <link rel="stylesheet" href="/css/table.css"/>
+  <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+  <script type="text/javascript">
+
+    $(document).ready(function () {
+      // 버튼 클릭했을 때, 발생되는 이벤트 생성함(onclick)
+      $("#btnAdd").on("click", function () {
+
+        $("#userData").append("<input type=\"text\" name=\"order\" placeholder=\"저장순서(실수만 입력가능)\"> ");
+        $("#userData").append("<input type=\"text\" name=\"name\" placeholder=\"이름\"> ");
+        $("#userData").append("<input type=\"text\" name=\"email\" placeholder=\"이메일\"> ");
+        $("#userData").append("<input type=\"text\" name=\"addr\" placeholder=\"주소\"> ");
+        $("#userData").append("<input type=\"button\" class=\"btnRemove\" value=\"Remove\" > ");
+        $("#userData").append("<br/>");
+
+        $(".btnRemove").on("click", function () {
+          $(this).prev().remove();    // 순서 지우기
+          $(this).prev().remove();    // 이름 지우기
+          $(this).prev().remove();    // 이메일 지우기
+          $(this).prev().remove();    // 주소 지우기
+          $(this).next().remove();    // <br/> 지우기
+          $(this).remove();           // 지우기 버튼 지우기
+        })
+      });
+
+      $("#btnSend").on("click", function () {
+
+        $.ajax({
+          url: "/redis/saveZSetJSON",
+          type: "POST",
+          data: $("#f").serialize(),
+          dataType: "JSON",
+          success: function (json) {
+
+            // 기존 데이터 삭제하기
+            $("#redisData").empty();
+
+            console.log("json.length : " + json.length)
+            for (let i = 0; i < json.length; i++) {
+              $("#redisData").append("<div class=\"divTableRow\">");
+              $("#redisData").append("<div class=\"divTableCell\">" + json[i].order + "</div>");
+              $("#redisData").append("<div class=\"divTableCell\">" + json[i].name + "</div>");
+              $("#redisData").append("<div class=\"divTableCell\">" + json[i].email + "</div>");
+              $("#redisData").append("<div class=\"divTableCell\">" + json[i].addr + "</div>");
+              $("#redisData").append("</div>");
+            }
+          }
+        })
+      });
+    })
+  </script>
+</head>
+<body>
+
+<h2>Redis ZSet 구조에 JSON 형태로 저장</h2>
+<br/><br/>
+<hr/>
+<form name="f" id="f">
+  <div class="divTable minimalistBlack">
+    <div class="divTableBody">
+      <div class="divTableRow">
+        <div class="divTableCell"> 입력 정보</div>
+        <div class="divTableCell" id="userData">
+          <input type="text" name="order" placeholder="저장순서"/>
+          <input type="text" name="name" placeholder="이름"/>
+          <input type="text" name="email" placeholder="이메일"/>
+          <input type="text" name="addr" placeholder="주소"/>
+          <input type="button" id="btnAdd" value="Add"><br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <button id="btnSend" type="button">저장하기</button>
+  </div>
+</form>
+<br/><br/>
+<div class="divTable minimalistBlack">
+  <div class="divTableHeading">
+    <div class="divTableRow">
+      <div class="divTableHead">저장순서</div>
+      <div class="divTableHead">이름</div>
+      <div class="divTableHead">이메일</div>
+      <div class="divTableHead">주소</div>
+    </div>
+  </div>
+  <div class="divTableBody" id="redisData"></div>
+</div>
+</body>
+</html>

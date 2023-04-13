@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redis hash 저장</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            // 버튼 클릭했을 때, 발생되는 이벤트 생성함(onclick)
+            $("#btnSend").on("click", function () {
+
+                $.ajax({
+                    url: "/redis/saveHash",
+                    type: "POST",
+                    data: $("#f").serialize(),
+                    dataType: "JSON",
+                    success: function (json) {
+
+                        $("#redisData").append("<div class=\"divTableRow\">");
+                        $("#redisData").append("<div class=\"divTableCell\">" + json.name + "</div>");
+                        $("#redisData").append("<div class=\"divTableCell\">" + json.email + "</div>");
+                        $("#redisData").append("<div class=\"divTableCell\">" + json.addr + "</div>");
+                        $("#redisData").append("</div>");
+                    }
+                })
+            });
+        })
+    </script>
+</head>
+<body>
+
+<h2>Redis hash 저장</h2>
+<br/><br/>
+<hr/>
+<form name="f" id="f">
+    <div class="divTable minimalistBlack">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell"> 이름</div>
+                <div class="divTableCell" style="width: 50%"><input type="text" name="name"/></div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell"> 이메일</div>
+                <div class="divTableCell" style="width: 50%"><input type="text" name="email"/></div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell"> 주소</div>
+                <div class="divTableCell" style="width: 50%"><input type="text" name="addr"/></div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button id="btnSend" type="button">저장하기</button>
+    </div>
+</form>
+<br/><br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">이름</div>
+            <div class="divTableHead">이메일</div>
+            <div class="divTableHead">주소</div>
+        </div>
+    </div>
+    <div class="divTableBody" id="redisData"></div>
+</div>
+</body>
+</html>
