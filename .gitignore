@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### test ###
+/src/main/java/kopo/poly/persistance/redis/impl/MelonCacheMapper.java
