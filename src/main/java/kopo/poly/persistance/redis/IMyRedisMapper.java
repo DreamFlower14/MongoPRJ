@@ -85,7 +85,7 @@ public interface IMyRedisMapper {
     int saveSetJSON(String redisKey, List<RedisDTO> pList) throws Exception;
 
     /**
-     * set 타입에 JSON 형태로 암다식을 이용하여 저장된 값 가져오기
+     * set 타입에 JSON 형태로 람다식을 이용하여 저장된 값 가져오기
      *
      * @param redisKey 가져올 redisKey
      * @return 결과값
